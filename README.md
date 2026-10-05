@@ -54,7 +54,7 @@ This is a planning engine, **not a verified tax calculator or eligibility determ
 
 `npm run check` checks JavaScript syntax. `npm test` runs consequential calculation tests for enacted tax rates, Age Pension means tests, covariance, cash-flow conservation, distribution double counting, pension minimum withdrawals, scheduled allocations, settlement timing, inheritance exclusion, essential spending shortfalls, loan payoff, backup schema and reproducibility.
 
-At initial handoff all 14 tests pass. A DOM-stub check renders all interview sections, repeaters, navigation and help topics without a runtime exception. **Browser/iPad layout, offline reopening and download/restore interaction testing remain pending** because no working test browser was available in the build workspace.
+Version 1.1 adds input warnings and blocking validation, corrects pension minimums and tax shortfalls, handles non-homeowner status without a pending purchase, and reports unsupported essential spending explicitly. See the automated tests for covered cases. A DOM-stub check renders all interview sections, repeaters, navigation and help topics without a runtime exception. The deployed app and strategy comparisons have been checked in a desktop browser. Actual iPad layout, offline reopening and download/restore interaction testing remain pending.
 
 ## Updates
 
@@ -63,3 +63,9 @@ Change the service-worker cache version when application files change. The worke
 ## Authoring record
 
 Date: 2026-10-06. Model: GPT-6. Prompt: Build a generic Australian/UK retirement PWA, covering the agreed interview, uncertainty, fixed/phased/guardrail spending comparisons, advanced reassessment, current/future dollars, editable assumptions and super allocation schedules, with local data, CSV, iPad design and GitHub Pages publishing.
+
+## Input safeguards (v1.1)
+
+Invalid or contradictory plans cannot calculate. Unusual assumptions stay editable with prominent warnings: inflation at or below 1%, zero investment volatility, high real returns, low correlations, exchange-rate direction, short horizons, unpaid debt interest, inheritance dependency and duplicated costs. Existing local answers and schema-1 backups are preserved. Close all app windows and reopen online to receive the update.
+
+Date: 2026-10-06. Model: GPT-6. Prompt: Audit and fix financial edge cases and flag reasonable input mistakes without overwriting user data.

@@ -1,4 +1,4 @@
-export const VERSION='1.0.0';
+export const VERSION='1.1.0';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,
@@ -59,3 +59,5 @@ export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[
  d.accounts=[{label:'Example super',owner:1,type:'accumulation',balance:350000,accessDate:'2028-08-20',pensionDate:'2028-08-20',fee:300,mix:mix(),changes:[],taxFree:100,manualWithdrawal:0}];
  d.spending.essential=50000;d.spending.desired=75000;d.spending.phases=[{year:2037,multiplier:90},{year:2047,multiplier:80}];d.spending.events=[{label:'Example car',date:'2030-06-01',amount:35000,kind:'expense',repeat:0}];d.completed=true;d.example=true;return d;}
 // Date: 2026-10-06. Model: GPT-6. Prompt: Build a generic Australian/UK retirement PWA, structured interview, local data, comparisons, editable assumptions and investment allocation schedules, for GitHub Pages.
+
+// Date: 2026-10-06. Model: GPT-6. Prompt: Version the input-safeguard and financial edge-case fixes.
