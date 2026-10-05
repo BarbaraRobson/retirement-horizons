@@ -1,4 +1,4 @@
-export const VERSION='1.1.1';
+export const VERSION='1.1.2';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,

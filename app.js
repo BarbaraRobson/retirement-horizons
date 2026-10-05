@@ -92,7 +92,7 @@ function wireCharts(){for(const svg of document.querySelectorAll('[data-chart]')
  function pointer(e){const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)/rect.width*1000,x=Math.round(min+clamp((px-75)/905,0,1)*(max-min));show(x);}svg.addEventListener('pointerdown',pointer);svg.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='mouse')pointer(e);});svg.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();show(clamp(current+(e.key==='ArrowRight'?1:-1),min,max));}});}}
 document.querySelector('#navigation').addEventListener('click',e=>{const el=e.target.closest('[data-action="nav"]');if(!el)return;page=el.dataset.page;render();window.scrollTo(0,0);});
 document.querySelector('#backup').onclick=backup;document.querySelector('#help-button').onclick=()=>{page='help';render();};
-if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js').then(reg=>{document.querySelector('#offline-status').textContent='Offline cache available';reg.addEventListener('updatefound',()=>{const sw=reg.installing;sw?.addEventListener('statechange',()=>{if(sw.state==='installed'&&navigator.serviceWorker.controller)toast('An update is ready. Back up, then close and reopen the app.');});});}).catch(()=>document.querySelector('#offline-status').textContent='Offline cache unavailable');}
+if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{navigator.serviceWorker.ready.then(()=>{document.querySelector('#offline-status').textContent='Offline cache available · v'+VERSION;});reg.addEventListener('updatefound',()=>{const sw=reg.installing;sw?.addEventListener('statechange',()=>{if(sw.state==='installed'&&navigator.serviceWorker.controller)toast('An update is ready. Back up, then close and reopen the app.');});});}).catch(()=>document.querySelector('#offline-status').textContent='Offline cache unavailable');}
 window.addEventListener('offline',()=>document.querySelector('#offline-status').textContent='Working offline');window.addEventListener('online',()=>document.querySelector('#offline-status').textContent='Online · data stays local');
 render();
 // Date: 2026-10-06. Model: GPT-6. Prompt: Build Retirement Horizons as a local-only iPad PWA, with structured interview, strategy comparison, current/future dollars, allocation schedules, help, CSV and backup/restore.
@@ -100,3 +100,5 @@ render();
 // Date: 2026-10-06. Model: GPT-6. Prompt: Show prominent input warnings, block invalid plans and label spending that cannot meet the success target; retain local financial answers.
 
 // Date: 2026-10-06. Model: GPT-6. Prompt: Repair main navigation discovered during live input-warning tests.
+
+// Date: 2026-10-06. Model: GPT-6. Prompt: Show offline availability only after worker readiness and identify the installed version without clearing user data.
