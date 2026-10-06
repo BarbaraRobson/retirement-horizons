@@ -28,11 +28,11 @@ test('Worker failure, timeout, cancellation and page exit retain saved answers',
  const oldSet=globalThis.setTimeout,oldClear=globalThis.clearTimeout,oldWorker=globalThis.Worker;
  globalThis.setTimeout=(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;};globalThis.clearTimeout=id=>timers.delete(id);
  globalThis.Worker=class{constructor(){this.terminated=false;workers.push(this);}postMessage(){}terminate(){this.terminated=true;}};
- try{await import('../app.js?worker-regression');const action=(action,extra={})=>handlers.get('#main:click')({target:{closest:()=>({dataset:{action,...extra}})}});action('nav',{page:'interview'});action('step',{step:'2'});assert(element('#main').innerHTML.includes('Defined benefit and UK pensions'));
+ try{await import('../app.js?worker-regression');const action=(action,extra={})=>handlers.get('#main:click')({target:{closest:()=>({dataset:{action,...extra}})}});action('nav',{page:'interview'});action('step',{step:'2'});assert(element('#main').innerHTML.includes('Defined benefit and UK pensions'));assert(element('#main').innerHTML.includes('Defined benefit commencement date'));assert(element('#main').innerHTML.includes('Default 67%'));
  action('calculate');const first=workers.at(-1);assert.equal(timers.size,1);first.onmessage({data:{error:'Device time limit reached'}});assert(first.terminated);assert.equal(timers.size,0);assert(element('#main').innerHTML.includes('Device time limit reached'));
  action('calculate');const second=workers.at(-1);const timer=[...timers.values()].find(t=>t.ms===200000);timer.fn();assert(second.terminated);assert(element('#main').innerHTML.includes('No partial result is shown'));
  action('calculate');action('cancel');assert(workers.at(-1).terminated);assert.equal(timers.size,0);
- action('calculate');handlers.get('window:pagehide')();assert(workers.at(-1).terminated);assert.equal(timers.size,0);assert.equal(stored.get('retirement-horizons-plan-v1'),JSON.stringify(d));
+ action('calculate');handlers.get('window:pagehide')();assert(workers.at(-1).terminated);assert.equal(timers.size,0);assert.equal(stored.get('retirement-horizons-plan-v1'),JSON.stringify({...d,start:`${new Date().getFullYear()}-01-01`}));
  globalThis.Worker=class{constructor(){throw Error('Worker unavailable');}};action('calculate');assert(element('#main').innerHTML.includes('could not start the calculation worker'));
  }finally{globalThis.setTimeout=oldSet;globalThis.clearTimeout=oldClear;globalThis.Worker=oldWorker;}
 });
@@ -55,3 +55,5 @@ test('Repeated pre-simulation navigation keeps controls mounted and releases old
 // Date: 2026-10-07. Model: GPT-6. Prompt: Stress repeated tab changes before any simulation, retaining navigation nodes and entered answers while releasing old form subtrees.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify a tab switch saves visible edits even without a native change event.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Verify calendar-start migration and visible DB commencement and published survivor-rate guidance.

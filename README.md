@@ -30,7 +30,7 @@ To import a backup, go to **Your details → Restore backup**, select the JSON f
 
 ## Updates
 
-Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.5**. Updates preserve existing schema-1 answers.
+Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.6**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
 
 ## Calculations, warnings and limitations
 
@@ -38,7 +38,11 @@ The app models monthly cash flows and displays annual summaries in current-year 
 
 Warnings flag choices such as inflation at or below 1%, zero investment fluctuations, optimistic returns, short horizons, inheritance dependence and duplicated costs. Invalid or contradictory dates, allocations and budgets block calculation. **Passing these checks does not establish that the information is correct or the results are reliable.** Read **Help** before interpreting results.
 
-Rules were reviewed on 6 October 2026 and may change. Important limitations include:
+Pension timing and survivor assumptions were reviewed on 7 October 2026. A blank defined benefit commencement date means already payable at the plan start; enter a future date for a pension that has not started. PSS generally permits pension access from 55 subject to retirement conditions. Age 60 changes its tax treatment. Projections now start on 1 January of the current year and extend through December of the final planning year, so all result rows cover whole calendar years. Existing plans and imported backups adopt that January start. Review opening balances at 1 January and all intervening income/events: the app cannot reconstruct historical balances from today’s figures. Income received earlier in the initial financial year refers to July–December before the January start. A $70,000 pension payable throughout the year contributes $70,000 gross before indexation; one commencing in October contributes $17,500 that year.
+
+The editable PSS survivor default is [CSC’s published spouse-only rate of 67%, or 85% under the higher dependant option](https://www.csc.gov.au/-/media/Files/PSS/Factsheets/PSF03-death-benefits.pdf). Verify the actual entitlement. Existing saved percentages are preserved; older backups gain a blank commencement date. Pre-commencement deaths, initial full-rate spouse payments, disability-specific tax offsets and changed components on death need separate verification.
+
+Other rules were reviewed on 6 October 2026 and may change. Important limitations include:
 
 - Tax, Age Pension and eligibility calculations are simplified. The app is not a verified tax calculator or eligibility determination.
 - Pension tax components, survivor terms, foreign-pension classification, applicable fund earnings, withholding and contribution eligibility/caps require independent verification. Unresolved UK lump-sum tax uses a labelled provisional 30% reserve.
@@ -81,3 +85,7 @@ Date: 2026-10-07. Model: GPT-6. Prompt: Rewrite the README for independent iPad/
 Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.
 
 Date: 2026-10-07. Model: GPT-6. Prompt: Document navigation hardening following reports of pre-simulation tab-switch crashes in iPad Chrome, without claiming a confirmed fix.
+
+Date: 2026-10-07. Model: GPT-6. Prompt: Review PSS survivor percentage, age-55 access and partial-year income; clarify periods, add commencement dates and correct related pension assumptions.
+
+Date: 2026-10-07. Model: GPT-6. Prompt: Keep the published 67% survivor default and start projections on 1 January of the current year with complete calendar-year results.

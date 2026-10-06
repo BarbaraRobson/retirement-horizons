@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {defaults,demo} from '../rules.js';import {incomeTax,agePension,mixStats,simulate,paths,settlement,compare,validate,month,inputErrors,warnings,solve} from '../model.js';
+import {defaults,demo} from '../rules.js';import {incomeTax,agePension,mixStats,simulate,paths,settlement,compare,validate,month,inputErrors,warnings,solve,calendarPlan} from '../model.js';
 function base(){const d=defaults();d.start='2026-07-01';d.people.forEach(p=>{p.dob='1966-07-01';p.endAge=61;p.residenceEligible='no';p.db.gross=0;p.db.verified=true;p.medicare=false;});d.assets.cash=100000;d.assets.outside=0;d.assets.costBasis=0;d.spending.essential=0;d.spending.desired=0;d.spending.reserve=0;d.settings.inflation=0;d.settings.inflationVol=0;d.settings.fxVol=0;d.settings.cashRate=0;d.assets.yield=0;d.assets.mix=[{option:'cash',weight:100,real:0,vol:0}];return d;}
 const zero=d=>new Float32Array(paths(d,1)[0].length);
 test('Enacted resident first-band tax changes use financial-year commencement',()=>{assert.equal(incomeTax(45000,2026),4020);assert(Math.abs(incomeTax(45000,2027)-3752)<1e-8);assert.equal(incomeTax(18200,2026),0);});
@@ -63,3 +63,36 @@ test('Standard comparisons actually use all 1500 requested stochastic paths',()=
  const d=base();d.settings.paths=1500;d.spending.desired=10000;assert.equal(inputErrors(d).length,0);const result=compare(d);assert(result.results.every(r=>r.count===1500));assert.equal(defaults().settings.paths,1500);d.settings.paths=1501;assert(inputErrors(d).some(e=>e.includes('paths')));
 });
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify the requested 1500-path stochastic sample is used without the former 1000-path clamp.
+
+test('PSS default follows the published spouse-only rate and old backups retain their terms',()=>{
+ assert.equal(defaults().people[0].db.survivor,67);const d=base();delete d.people[0].db.start;d.people[0].db.survivor=70;const loaded=validate(d);assert.equal(loaded.people[0].db.start,'');assert.equal(loaded.people[0].db.survivor,70);
+});
+test('PSS pays at 55 and 59; October start is three months, not an age-60 gate',()=>{
+ for(const age of [55,59]){const d=base();d.start='2026-10-01';d.people.forEach(p=>{p.dob=`${2026-age}-10-01`;p.endAge=age+2;});d.people[0].db.gross=70000;const r=simulate(d,'fixed',0,zero(d),{detail:true});assert.equal(r.rows[0].months,3);assert(Math.abs(r.rows[0].db-17500)<.01);assert(Math.abs(r.rows[1].db-70000)<.01);}
+});
+test('Explicit DB commencement applies to both retirement and settlement projections',()=>{
+ const d=base();d.people[0].db.gross=70000;d.people[0].db.start='2027-01-01';const r=simulate(d,'fixed',0,zero(d),{detail:true});assert.equal(r.rows[0].db,0);assert(Math.abs(r.rows[1].db-35000)<.01);const cash=settlement(d)[0].rows;assert.equal(cash[0].cash,100000);assert.equal(cash[5].cash,100000);assert(cash[6].cash>100000);
+});
+test('Contradictory absent pension and invalid commencement are blocked',()=>{
+ const d=base();d.people[0].db.gross=70000;d.people[0].db.kind='None';assert(inputErrors(d).some(e=>e.includes('scheme is None')));assert.equal(simulate(d,'fixed',0,zero(d),{detail:true}).rows[0].db,0);d.people[0].db.start='2027-02-30';assert(inputErrors(d).some(e=>e.includes('commencement date')));
+});
+test('Survivor DB tax uses age at death, not the deceased’s later hypothetical birthday',()=>{
+ const make=(dob,taxed)=>{const d=base();d.start='2026-07-01';d.people[0].dob=dob;d.people[0].endAge=63;d.people[0].deathAge=(2027-Number(dob.slice(0,4)));d.people[1].dob='1970-01-01';d.people[1].endAge=58;d.people[0].db.gross=70000;d.people[0].db.survivor=100;d.people[0].db.taxed=taxed;d.people[0].db.untaxed=100-taxed;return d;};
+ // Death at 60 makes the taxed element tax-free for an under-60 spouse.
+ const a=make('1967-01-01',100);a.people[0].db.start='2027-01-01';const ar=simulate(a,'fixed',0,zero(a),{detail:true});assert(Math.abs(ar.rows.reduce((s,y)=>s+y.tax,0))<.01);
+ // Death at 59 leaves the taxed element assessable with a 15% offset, even next year.
+ const b=make('1968-01-01',100);b.people[0].db.start='2027-01-01';const br=simulate(b,'fixed',0,zero(b),{detail:true});assert(br.rows.find(y=>y.year===2028).tax>0);
+ // Untaxed element stays taxable; death at 60 receives the 10% offset.
+ const c=make('1967-01-01',0),e=make('1968-01-01',0);const cr=simulate(c,'fixed',0,zero(c),{detail:true}),er=simulate(e,'fixed',0,zero(e),{detail:true});assert(cr.rows.find(y=>y.year===2027).tax<er.rows.find(y=>y.year===2027).tax);
+});
+test('UK survivor pension reduction waits until the scheduled lump sum',()=>{
+ const d=base();d.people.forEach(p=>p.endAge=63);d.people[0].deathAge=60.5;d.people[0].uk.ongoingGBP=12000;d.people[0].uk.ongoingStart=d.start;d.people[0].uk.survivor=100;d.people[0].uk.reductionGBP=6000;d.people[0].uk.date='2028-01-01';d.people[0].uk.processingDays=0;d.settings.fx=1;const r=simulate(d,'fixed',0,zero(d),{detail:true});assert.equal(r.rows.find(y=>y.year===2027).uk,12000);assert.equal(r.rows.find(y=>y.year===2028).uk,6000);
+});
+// Date: 2026-10-07. Model: GPT-6. Prompt: Retain the published 67% PSS survivor default; verify pre-60 payments, partial-year totals, explicit commencement, old backups, survivor tax and UK reduction timing.
+test('Current-year start and end rounding give twelve-month rows and a full 70000 pension',()=>{
+ const d=calendarPlan(base());assert.equal(d.start,`${new Date().getFullYear()}-01-01`);d.people.forEach(p=>{p.dob=`${Number(d.start.slice(0,4))-59}-10-01`;p.endAge=61;});d.people[0].db.gross=70000;const r=simulate(d,'fixed',0,zero(d),{detail:true});assert(r.rows.every(y=>y.months===12));assert(r.rows.every(y=>Math.abs(y.db-70000)<.01));assert.equal(r.rows.length,3);assert.equal(defaults().start.slice(4),'-01-01');
+});
+test('Both deaths during a year still produce a complete final calendar-year row',()=>{
+ const d=calendarPlan(base());const year=Number(d.start.slice(0,4));d.people.forEach(p=>{p.dob=`${year-60}-07-01`;p.endAge=62;p.deathAge=60;});const r=simulate(d,'fixed',12000,zero(d),{detail:true});assert(r.rows.every(y=>y.months===12));assert.equal(r.rows[0].spending,6000);
+});
+// Date: 2026-10-07. Model: GPT-6. Prompt: Verify current-year January commencement, full-year PSS totals and complete final calendar-year rows.

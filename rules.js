@@ -1,4 +1,4 @@
-export const VERSION='1.1.5';
+export const VERSION='1.1.6';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,
@@ -17,6 +17,9 @@ export const PRESETS={
  custom:{name:'Custom option',real:3.5,vol:10}
 };
 export const SOURCES=[
+ ['PSS pension access from age 55','https://www.csc.gov.au/Defined-benefit-members/Access-benefit/Plan-retirement/When-can-I-retire/pss/'],
+ ['PSS death benefits and spouse rates','https://www.csc.gov.au/-/media/Files/PSS/Factsheets/PSF03-death-benefits.pdf'],
+ ['Death benefit pension tax','https://www.ato.gov.au/law/view/document?docid=COG/LCR201610/NAT/ATO/00001'],
  ['PSS pension taxation','https://www.csc.gov.au/Defined-benefit-members/Resources/Learning-centre/How-super-works/Tax-and-your-super/pss/'],
  ['PSSap investment options','https://www.csc.gov.au/Members/Funds-and-products/PSSap/pssap/'],
  ['PSSap target asset allocations','https://www.csc.gov.au/members/resources/product-disclosure-statement/asset-allocation/pssap'],
@@ -45,10 +48,10 @@ export const SOURCES=[
 ];
 export const mix=()=>[{option:'balanced',weight:100,real:3.5,vol:10}];
 export function person(label){return {label,dob:'',resident:true,residenceEligible:'unknown',medicare:true,hospital:true,endAge:100,deathAge:null,priorIncome:0,extraTax:0,
- db:{gross:null,free:0,taxed:0,untaxed:100,survivor:67,verified:false,deductible:0,indexed:true,kind:'PSS'},
+ db:{gross:null,free:0,taxed:0,untaxed:100,survivor:67,verified:false,deductible:0,indexed:true,kind:'PSS',start:''},
  uk:{lumpGBP:null,date:'',ongoingGBP:0,ongoingStart:'',reductionGBP:0,survivor:0,stateGBP:0,stateStart:'',taxMode:'unknown',manualTax:0,afeGBP:0,verified:false,provider:'',scheme:'unknown',residentSince:'',vestedGBP:null,contributionsGBP:0,totalGBP:null,withholdingGBP:0,processingDays:30},
  otherIncome:0,otherIncomeEnd:'',taxableOther:100};}
-export function defaults(){const now=new Date();const date=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;return {schema:1,completed:false,example:false,start:date,people:[person('Partner 1'),person('Partner 2')],
+export function defaults(){const now=new Date();const date=`${now.getFullYear()}-01-01`;return {schema:1,completed:false,example:false,start:date,people:[person('Partner 1'),person('Partner 2')],
  assets:{cash:null,outside:null,costBasis:null,ownerShare:50,yield:2.5,franking:0,discount:true,otherAssets:0,propertyValue:0,rent:0,propertyCost:0,debt:0,debtRate:6,debtPayment:0,debtOwner:50,mix:mix(),changes:[]},
  accounts:[],housing:{enabled:false,soldDate:'',netProceeds:0,earliest:'',expected:'',latest:'',balance:null,costs:0,deposit:0,value:0,state:'',mainHome:true,homeowner:true,reserved:0,rent:0,rentEnd:'',strata:0,extraDelayCost:0,exemptionMonths:24,extensionVerified:false,mortgage:0,mortgageRate:6,mortgagePayment:0,bridge:0,bridgeRate:8},
  spending:{essential:null,desired:null,reserve:30000,estate:0,survivor:75,phases:[],events:[],careAge:85,careAnnual:0,careLump:0,careYears:4,homeSaleAge:null,homeSaleNet:0},
@@ -67,3 +70,7 @@ export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[
 // Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Release navigation hardening and delayed-input commit fixes without discarding saved plans.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Review PSS survivor percentage, age-55 access and partial-year income; clarify periods, add commencement dates and correct related pension assumptions.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Keep the published 67% survivor default and start projections on 1 January of the current year with complete calendar-year results.

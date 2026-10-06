@@ -29,6 +29,9 @@ export function inputErrors(d){
   if(validDate(p.dob)&&start!==null){const a=ageAt(p.dob,start);need(a>=18&&a<120,`${p.label}: check the date of birth; this app supports adult retirement plans.`);need(num(p.endAge)&&p.endAge>a&&p.endAge<=120,`${p.label}: planning end age must be later than current age and no more than 120.`);if(p.deathAge!==null)need(num(p.deathAge)&&p.deathAge>a&&p.deathAge<=p.endAge,`${p.label}: death age must be after current age and within the planning horizon.`);}
   if((p.db.gross||0)>0)need(Math.abs(p.db.free+p.db.taxed+p.db.untaxed-100)<.01,`${p.label}: pension tax components must total 100%.`);
   for(const k of ['free','taxed','untaxed','survivor','deductible'])need(num(p.db[k])&&p.db[k]>=0&&p.db[k]<=100,`${p.label}: pension ${k} must be between 0 and 100%.`);
+  if(p.db.start)need(validDate(p.db.start),`${p.label}: enter a valid defined benefit commencement date.`);
+  need(['PSS','Other taxed DB','Other untaxed DB','None'].includes(p.db.kind),`${p.label}: select a supported defined benefit scheme.`);
+  if(p.db.kind==='None')need(!(p.db.gross>0),`${p.label}: defined benefit scheme is None but an income is entered; choose the scheme or enter zero.`);
   if(p.otherIncomeEnd)need(validDate(p.otherIncomeEnd),`${p.label}: check the other-income end date.`);
   if(p.uk.ongoingGBP>0)need(validDate(p.uk.ongoingStart),`${p.label}: enter a start date for the continuing UK pension.`);
   if(p.uk.stateGBP>0)need(validDate(p.uk.stateStart),`${p.label}: enter a start date for UK State Pension.`);
@@ -91,6 +94,7 @@ export function inputWarnings(d){
  if(s.benefitIndex>s.inflation+1)w.push('Benefits and means-test thresholds grow faster than inflation. This may overstate future Age Pension support.');
  if(s.paths<400)w.push('Fewer than 400 paths gives coarse tail probabilities. A displayed success percentage is a model sample, not a precise guarantee.');
  if(s.success>=98)w.push('The selected success target is close to the simulation tail. Rare-event estimates are sensitive to sample size and model assumptions.');
+ if(start!==null&&start%12===0)w.push('Whole-year projection: opening balances must be at 1 January, with all income and events from that date. Updating the start does not reconstruct past balances. The final planning year extends through December.');
  const allocations=[['Outside investments',d.assets.outside,d.assets],...d.accounts.map(a=>[a.label,a.balance,a])];
  for(const [label,balance,a] of allocations){if(!(balance>0)&&!(a===d.assets&&d.assets.cash>d.spending.reserve))continue;
   for(const [name,rows] of [['current mix',a.mix],...a.changes.map(c=>['mix from '+c.year,c.mix])]){
@@ -104,6 +108,13 @@ export function inputWarnings(d){
  if(d.assets.yield>10&&d.assets.outside>0)w.push('Outside investment distribution yield exceeds 10%. Yield is part of total return, not additional return; check for entering a dollar amount as a percentage.');
  if(s.correlation<.25&&allocations.some(x=>x[1]>0&&x[2].mix.filter(r=>r.weight>0&&r.vol>0).length>1))w.push('Low correlation can materially reduce simulated portfolio risk. Check that the options really provide this degree of diversification.');
  d.people.forEach(p=>{
+  if(p.db.gross>0&&p.db.kind!=='None'){
+   if(!p.db.start)w.push(`${p.label}: defined benefit pension is assumed already payable at the plan start. Enter a commencement date if it starts later.`);
+   if(p.db.kind==='PSS'&&p.db.survivor!==67&&p.db.survivor!==85)w.push(`${p.label}: PSS survivor assumption is ${p.db.survivor}%. CSC lists 67% for spouse only, or 85% under the higher dependant option; verify your entitlement.`);
+   if(p.db.kind==='PSS'&&validDate(p.dob)&&ageAt(p.dob,mo(p.db.start)??start)<55)w.push(`${p.label}: ordinary PSS retirement access generally starts at 55 subject to retirement conditions. Earlier or invalidity benefits require a verified estimate; disability tax offsets are not modelled.`);
+   if(p.db.untaxed===100&&!p.db.verified)w.push(`${p.label}: the default 100% untaxed component may overstate tax. Enter the actual pension components from CSC payment advice.`);
+   if(d.scenario.survivor!=='none'||d.people.some(x=>x.deathAge!==null))w.push(`${p.label}: survivor modelling assumes an eligible spouse and an already commenced pension. Death before commencement, initial full-rate payments, child benefits and changed tax components need a separate verified estimate.`);
+  }
   if(validDate(p.dob)&&start!==null&&p.endAge<90)w.push(`${p.label}: planning ends before age 90. A short horizon can increase supported spending; compare with age 95–100.`);
   if(validDate(p.dob)&&p.endAge-ageAt(p.dob,start)>60)w.push(`${p.label}: the model is limited to 60 future years; this end age is not fully simulated.`);
   if(p.db.gross>0&&p.db.gross<15000)w.push(`${p.label}: check that the pension is a gross annual amount, not a monthly or fortnightly payment.`);
@@ -135,3 +146,7 @@ export function inputWarnings(d){
 // Date: 2026-10-06. Model: GPT-6. Prompt: Audit Retirement Horizons for edge cases and reasonable user errors; block contradictory inputs and warn about optimistic or risk-free assumptions.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Review PSS survivor percentage, age-55 access and partial-year income; clarify periods, add commencement dates and correct related pension assumptions.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Keep the published 67% survivor default and start projections on 1 January of the current year with complete calendar-year results.
