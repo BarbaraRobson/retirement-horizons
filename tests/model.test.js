@@ -58,3 +58,8 @@ test('Time budgets reject standard and advanced work without returning partial r
  const check=()=>{throw Error('Stopped nested work');};assert.throws(()=>simulate(d,'reassessment',10000,zero(d),{detail:true,check}),/Stopped nested work/);assert.throws(()=>solve(d,'fixed',paths(d,1),6,check),/Stopped nested work/);
 });
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify compact aggregation keeps simulation results unchanged and calculation budgets stop work without presenting partial results.
+
+test('Standard comparisons actually use all 1500 requested stochastic paths',()=>{
+ const d=base();d.settings.paths=1500;d.spending.desired=10000;assert.equal(inputErrors(d).length,0);const result=compare(d);assert(result.results.every(r=>r.count===1500));assert.equal(defaults().settings.paths,1500);d.settings.paths=1501;assert(inputErrors(d).some(e=>e.includes('paths')));
+});
+// Date: 2026-10-07. Model: GPT-6. Prompt: Verify the requested 1500-path stochastic sample is used without the former 1000-path clamp.

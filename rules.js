@@ -1,4 +1,4 @@
-export const VERSION='1.1.3';
+export const VERSION='1.1.4';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,
@@ -52,7 +52,7 @@ export function defaults(){const now=new Date();const date=`${now.getFullYear()}
  assets:{cash:null,outside:null,costBasis:null,ownerShare:50,yield:2.5,franking:0,discount:true,otherAssets:0,propertyValue:0,rent:0,propertyCost:0,debt:0,debtRate:6,debtPayment:0,debtOwner:50,mix:mix(),changes:[]},
  accounts:[],housing:{enabled:false,soldDate:'',netProceeds:0,earliest:'',expected:'',latest:'',balance:null,costs:0,deposit:0,value:0,state:'',mainHome:true,homeowner:true,reserved:0,rent:0,rentEnd:'',strata:0,extraDelayCost:0,exemptionMonths:24,extensionVerified:false,mortgage:0,mortgageRate:6,mortgagePayment:0,bridge:0,bridgeRate:8},
  spending:{essential:null,desired:null,reserve:30000,estate:0,survivor:75,phases:[],events:[],careAge:85,careAnnual:0,careLump:0,careYears:4,homeSaleAge:null,homeSaleNet:0},
- inheritances:[],contributions:[],settings:{inflation:2.5,inflationVol:1,fx:1/.5249,fxVol:10,fxFee:1,cashRate:3.5,success:95,paths:400,seed:104729,withdrawal:'outside-first',taxBracketIndex:0,benefitIndex:2.5,guardThreshold:20,guardStep:10,guardMax:150,rebalance:true,correlation:.75,returnShift:0,crashChance:5,crashSize:30,poorYears:8,poorPenalty:2,medicareSingle:28500,medicareSenior:45000,medicareFamily:48000,medicareSeniorFamily:63000,dbCap:131250},
+ inheritances:[],contributions:[],settings:{inflation:2.5,inflationVol:1,fx:1/.5249,fxVol:10,fxFee:1,cashRate:3.5,success:95,paths:1500,seed:104729,withdrawal:'outside-first',taxBracketIndex:0,benefitIndex:2.5,guardThreshold:20,guardStep:10,guardMax:150,rebalance:true,correlation:.75,returnShift:0,crashChance:5,crashSize:30,poorYears:8,poorPenalty:2,medicareSingle:28500,medicareSenior:45000,medicareFamily:48000,medicareSeniorFamily:63000,dbCap:131250},
  scenario:{inheritance:'none',timing:'expected',pensionDelay:0,fxShock:0,stress:'normal',survivor:'none',deathYear:null,care:false},lastBackup:null};}
 export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[1].dob='1968-08-20';d.people.forEach(p=>{p.residenceEligible='yes';p.db.gross=0;p.db.verified=true;});d.people[0].db.gross=52000;d.people[0].db.free=10;d.people[0].db.untaxed=90;d.people[0].db.deductible=10;d.people[0].uk.lumpGBP=45000;d.people[0].uk.date='2027-03-15';d.people[0].uk.taxMode='manual';d.people[0].uk.manualTax=8000;d.people[0].uk.verified=true;
  d.assets.cash=470000;d.assets.outside=150000;d.assets.costBasis=125000;d.housing={...d.housing,enabled:true,soldDate:'2026-07-01',earliest:'2027-02-01',expected:'2027-04-01',latest:'2027-09-01',balance:400000,costs:15000,value:750000,reserved:415000,rent:1800,strata:7000};
@@ -63,3 +63,5 @@ export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[
 // Date: 2026-10-06. Model: GPT-6. Prompt: Version the input-safeguard and financial edge-case fixes.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Rewrite the README for iPad/iPhone users with a prominent education and entertainment disclaimer and live address; rename Pensions to Defined benefit and UK pensions; investigate and reduce browser crashes.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.

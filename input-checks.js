@@ -69,7 +69,7 @@ export function inputErrors(d){
  need(['normal','poor','crashes'].includes(d.scenario.stress),'Select a supported market scenario.');
  need(['earliest','expected','latest'].includes(d.scenario.timing),'Select a supported settlement timing.');
  need(['none','all','late','low','high',...d.inheritances.map((x,i)=>String(i))].includes(d.scenario.inheritance),'Selected inheritance no longer exists; choose the baseline or an existing inheritance.');
- const bounds={inflation:[-2,10],inflationVol:[0,5],fx:[.5,5],fxVol:[0,30],fxFee:[0,10],cashRate:[0,15],success:[80,99],paths:[100,1000],correlation:[0,.99],returnShift:[-10,10],benefitIndex:[0,10],taxBracketIndex:[0,10],guardThreshold:[5,50],guardStep:[1,30],guardMax:[100,250],crashChance:[0,30],crashSize:[0,70],poorYears:[0,30],poorPenalty:[0,10]};
+ const bounds={inflation:[-2,10],inflationVol:[0,5],fx:[.5,5],fxVol:[0,30],fxFee:[0,10],cashRate:[0,15],success:[80,99],paths:[100,1500],correlation:[0,.99],returnShift:[-10,10],benefitIndex:[0,10],taxBracketIndex:[0,10],guardThreshold:[5,50],guardStep:[1,30],guardMax:[100,250],crashChance:[0,30],crashSize:[0,70],poorYears:[0,30],poorPenalty:[0,10]};
  for(const [k,[lo,hi]] of Object.entries(bounds))need(num(d.settings[k])&&d.settings[k]>=lo&&d.settings[k]<=hi,`${k}: enter a value between ${lo} and ${hi}.`);
  need(Number.isInteger(d.settings.paths),'Simulation paths must be a whole number.');
  for(const [o,k] of [[d.assets,'ownerShare'],[d.assets,'franking'],[d.assets,'yield'],[d.spending,'survivor']])need(num(o[k])&&o[k]<=100,`${k} must be between 0 and 100%.`);
@@ -133,3 +133,5 @@ export function inputWarnings(d){
  return w;
 }
 // Date: 2026-10-06. Model: GPT-6. Prompt: Audit Retirement Horizons for edge cases and reasonable user errors; block contradictory inputs and warn about optimistic or risk-free assumptions.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.

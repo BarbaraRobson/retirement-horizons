@@ -30,7 +30,7 @@ To import a backup, go to **Your details → Restore backup**, select the JSON f
 
 ## Updates
 
-Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.3**. Updates preserve existing schema-1 answers.
+Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.4**. Updates preserve existing schema-1 answers.
 
 ## Calculations, warnings and limitations
 
@@ -50,9 +50,11 @@ Rules were reviewed on 6 October 2026 and may change. Important limitations incl
 
 ## If a calculation stops or the browser reloads
 
-Standard comparisons stop after 50 seconds of computation; advanced annual reassessment stops after 30 seconds. A separate browser watchdog terminates a stalled worker. No incomplete comparison is presented as a completed result. The limits protect against runaway calculations but cannot prevent every device or browser crash.
+The default sample is 1,500 stochastic paths for each standard strategy. Plans still using the former 400-path default are upgraded once; other saved sample counts are kept. Larger samples can take several minutes on a mobile device. Standard comparisons stop after three minutes of computation; advanced annual reassessment stops after 30 seconds. A separate browser watchdog terminates a stalled worker. No incomplete comparison is presented as a completed result. The limits protect against runaway calculations but cannot prevent every device or browser crash.
 
 If a calculation cannot finish, keep a backup, set **Your details → Assumptions → Simulation paths** to **100**, and use the three standard strategies. Fewer paths mean greater sampling uncertainty. Annual reassessment runs many nested simulations and may not finish on a slower device. **Cancel calculation** stops a running calculation. Leaving the page stops its worker.
+
+Tab switching now keeps navigation buttons mounted, commits and blurs focused controls before replacing forms, skips unchanged pages, and unparents old form descendants to reduce the amount a browser can retain. This is defensive hardening; a tab-switch crash on iPad Chrome has not been reproduced on physical hardware.
 
 If the page reloads unexpectedly, reopen the same copy and check that the saved answers are present. Close other heavy browser tabs and try again after updating online. For a bug report, provide the app version, device model, iOS/iPadOS version, the action that triggered it and any displayed error. Do not publish a personal backup or financial figures in a public issue.
 
@@ -75,3 +77,7 @@ Date: 2026-10-06. Model: GPT-6. Prompt: Build a generic Australian/UK retirement
 Date: 2026-10-06. Model: GPT-6. Prompt: Audit and fix financial edge cases and flag reasonable input mistakes without overwriting user data.
 
 Date: 2026-10-07. Model: GPT-6. Prompt: Rewrite the README for independent iPad/iPhone installation with a prominent education and entertainment warning, possible errors and no personal financial advice; use the active address; rename the pensions section and investigate browser crashes.
+
+Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.
+
+Date: 2026-10-07. Model: GPT-6. Prompt: Document navigation hardening following reports of pre-simulation tab-switch crashes in iPad Chrome, without claiming a confirmed fix.
