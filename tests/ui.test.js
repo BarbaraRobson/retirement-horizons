@@ -20,3 +20,20 @@ test('Navigation, assumption warnings and blocked calculations work with saved a
  assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).people[0].dob,d.people[0].dob);
 });
 // Date: 2026-10-06. Model: GPT-6. Prompt: Regression-test navigation, visible assumption warnings, blocked invalid calculations and preservation of saved questionnaire answers.
+
+test('Worker failure, timeout, cancellation and page exit retain saved answers',async()=>{
+ const d=demo();d.start='2026-10-01';const handlers=new Map(),elements=new Map(),stored=new Map([['retirement-horizons-plan-v1',JSON.stringify(d)]]),timers=new Map(),workers=[];let timerId=0;
+ const element=id=>{if(!elements.has(id))elements.set(id,{innerHTML:'',textContent:'',style:{},addEventListener:(kind,fn)=>handlers.set(id+':'+kind,fn)});return elements.get(id);};
+ globalThis.document={querySelector:element,querySelectorAll:()=>[]};globalThis.localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)};globalThis.window={addEventListener:(k,fn)=>handlers.set('window:'+k,fn),scrollTo(){}};
+ const oldSet=globalThis.setTimeout,oldClear=globalThis.clearTimeout,oldWorker=globalThis.Worker;
+ globalThis.setTimeout=(fn,ms)=>{const id=++timerId;timers.set(id,{fn,ms});return id;};globalThis.clearTimeout=id=>timers.delete(id);
+ globalThis.Worker=class{constructor(){this.terminated=false;workers.push(this);}postMessage(){}terminate(){this.terminated=true;}};
+ try{await import('../app.js?worker-regression');const action=(action,extra={})=>handlers.get('#main:click')({target:{closest:()=>({dataset:{action,...extra}})}});action('nav',{page:'interview'});action('step',{step:'2'});assert(element('#main').innerHTML.includes('Defined benefit and UK pensions'));
+ action('calculate');const first=workers.at(-1);assert.equal(timers.size,1);first.onmessage({data:{error:'Device time limit reached'}});assert(first.terminated);assert.equal(timers.size,0);assert(element('#main').innerHTML.includes('Device time limit reached'));
+ action('calculate');const second=workers.at(-1);const timer=[...timers.values()].find(t=>t.ms===60000);timer.fn();assert(second.terminated);assert(element('#main').innerHTML.includes('No partial result is shown'));
+ action('calculate');action('cancel');assert(workers.at(-1).terminated);assert.equal(timers.size,0);
+ action('calculate');handlers.get('window:pagehide')();assert(workers.at(-1).terminated);assert.equal(timers.size,0);assert.equal(stored.get('retirement-horizons-plan-v1'),JSON.stringify(d));
+ globalThis.Worker=class{constructor(){throw Error('Worker unavailable');}};action('calculate');assert(element('#main').innerHTML.includes('could not start the calculation worker'));
+ }finally{globalThis.setTimeout=oldSet;globalThis.clearTimeout=oldClear;globalThis.Worker=oldWorker;}
+});
+// Date: 2026-10-07. Model: GPT-6. Prompt: Regression-test the renamed pension section and worker failure, timeout, cancellation and page-exit cleanup without losing saved answers.

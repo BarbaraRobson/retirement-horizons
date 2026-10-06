@@ -44,3 +44,17 @@ test('One-off foreign earnings tax is accrued once rather than annualised monthl
 test('Ongoing UK income cannot silently vanish when its start date is missing',()=>{const d=base();d.people[0].uk.ongoingGBP=10000;d.people[1].uk.stateGBP=5000;const es=inputErrors(d);assert(es.some(x=>x.includes('continuing UK pension')));assert(es.some(x=>x.includes('start date for UK State')));});
 test('UK estate allowances cannot be used accidentally with AUD estate figures',()=>{const d=base();d.inheritances=[{label:'Estate',mode:'estate',currency:'AUD'}];assert(inputErrors(d).some(x=>x.includes('in GBP')));});
 // Date: 2026-10-06. Model: GPT-6. Prompt: Test missing UK pension start dates and inheritance currency mistakes.
+
+test('Compact aggregation preserves per-year percentiles and success rates',()=>{
+ const d=base();d.people.forEach(p=>p.endAge=63);d.assets.cash=220000;d.spending.essential=15000;d.spending.desired=25000;d.settings.paths=100;d.settings.inflation=2.5;d.settings.inflationVol=1;
+ const result=compare(d),zs=paths(d,100);
+ for(const r of result.results){const runs=zs.map(z=>simulate(d,r.strategy,r.start,z,{detail:true}));assert.equal(r.success,runs.filter(x=>x.success).length/100);for(const row of r.rows){const values=runs.map(x=>x.rows.find(y=>y.year===row.year)).filter(Boolean);for(const f of ['spending','assets','tax','shortfall']){const a=values.map(x=>x[f]/x.infl).sort((a,b)=>a-b);const q=p=>{const i=(a.length-1)*p;return a[Math.floor(i)]+(a[Math.ceil(i)]-a[Math.floor(i)])*(i%1);};assert.equal(row[f],q(.5));assert.equal(row[f+'10'],q(.1));assert.equal(row[f+'90'],q(.9));}}}
+});
+test('Summary-only simulations preserve detailed outcomes across tax years',()=>{
+ const d=base();d.people.forEach(p=>p.endAge=64);d.assets.cash=300000;d.people[0].otherIncome=12000;d.people[0].medicare=true;const z=paths(d,1)[0];const detailed=simulate(d,'fixed',35000,z,{detail:true}),summary=simulate(d,'fixed',35000,z);assert.deepEqual(summary,{...detailed,rows:[]});
+});
+test('Time budgets reject standard and advanced work without returning partial results',()=>{
+ const d=base();for(const advanced of [false,true])assert.throws(()=>compare(d,()=>{},advanced,{timeLimitMs:0}),/device time limit/);
+ const check=()=>{throw Error('Stopped nested work');};assert.throws(()=>simulate(d,'reassessment',10000,zero(d),{detail:true,check}),/Stopped nested work/);assert.throws(()=>solve(d,'fixed',paths(d,1),6,check),/Stopped nested work/);
+});
+// Date: 2026-10-07. Model: GPT-6. Prompt: Verify compact aggregation keeps simulation results unchanged and calculation budgets stop work without presenting partial results.

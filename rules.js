@@ -1,4 +1,4 @@
-export const VERSION='1.1.2';
+export const VERSION='1.1.3';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,
@@ -61,3 +61,5 @@ export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[
 // Date: 2026-10-06. Model: GPT-6. Prompt: Build a generic Australian/UK retirement PWA, structured interview, local data, comparisons, editable assumptions and investment allocation schedules, for GitHub Pages.
 
 // Date: 2026-10-06. Model: GPT-6. Prompt: Version the input-safeguard and financial edge-case fixes.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Rewrite the README for iPad/iPhone users with a prominent education and entertainment disclaimer and live address; rename Pensions to Defined benefit and UK pensions; investigate and reduce browser crashes.

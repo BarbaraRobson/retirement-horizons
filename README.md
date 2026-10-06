@@ -1,71 +1,77 @@
 # Retirement Horizons
 
-An offline-capable, local-only retirement planning PWA for Australian couples with Australian or UK pension interests. Public files contain only generic rules and explicitly fictional demonstration data.
+> **FOR EDUCATION AND ENTERTAINMENT PURPOSES ONLY.**
+>
+> **This app may contain errors, omissions or incorrect assumptions. Its calculations and results are not personal financial advice and must not be treated as such. Do not make investment, retirement, pension, tax or property decisions on the strength of its results. Verify important figures independently and seek advice from a suitably qualified professional about your circumstances.**
 
-## Included
+## Open the app
 
-- Eight-section branching interview; unknown amounts are flagged, not presented as known zeroes.
-- Comparison of model-supported fixed spending, spending phases and guardrails on common market paths.
-- Optional slower annual reassessment with a reduced simulation sample.
-- Monthly financial modelling and annual summaries; current-year dollars by default and approximate future-dollar display.
-- Apartment settlement cash checks for early, expected and delayed completion.
-- Standard taxed-super accounts, accessible dates, pension dates, minimum withdrawals, custom weighted investment mixes and future-year allocation changes.
-- Australian resident income tax and core Age Pension means tests, including younger-partner accumulation super and home-sale proceeds assumptions.
-- UK receipts, conversion costs, verified tax provisions/applicable fund earnings, UK pension/State Pension income, net inheritance scenarios and a simplified UK estate estimate.
-- Survivor, care-cost, market crash, poor-return and FX scenarios.
-- Local autosave, previous-plan recovery, JSON backup/restore, CSV inputs and projections, offline help and official source links.
+**Active page: https://barbararobson.github.io/retirement-horizons/**
 
-## Publish on GitHub Pages
+Retirement Horizons is a free, offline-capable retirement simulation for Australian couples with Australian defined benefit or UK pension interests. It compares fixed spending, spending phases and guardrails under simulated markets. The fictional example is for trying the controls; it is not a suggested financial plan.
 
-1. Create a **public** repository named `retirement-horizons` in the intended GitHub account.
-2. Upload this folder's contents, including `.github/workflows/pages.yml`, into the repository root on `main`. Do not upload personal financial files or backup exports.
-3. In Settings → Pages → Build and deployment, select **GitHub Actions**.
-4. Run the **Publish Retirement Horizons** workflow or push to `main`. The workflow checks syntax, runs the financial tests, packages only public application files and deploys them.
-5. The address will normally be `https://USERNAME.github.io/retirement-horizons/`.
+## Install on your own iPad or iPhone
 
-A branch-based Pages alternative is to publish `main` / root. This also serves the app without a build, but does not run the included checks as a deployment gate. There are no package dependencies; Node 22+ is sufficient for the tests.
+1. While connected to the internet, open **https://barbararobson.github.io/retirement-horizons/** in **Safari**.
+2. Tap **Share**, then **Add to Home Screen**. If offered, enable **Open as Web App**, then tap **Add**. Depending on the Safari layout, Share may be in the menu.
+3. Open **Retirement Horizons** from your Home Screen. Wait until the footer says **Offline cache available**. Close the app completely and reopen it to finish the first offline setup.
+4. Try reopening with Wi-Fi and mobile data off. Reconnect if the app does not load; the first download must finish online.
+5. Use that same installed copy for your plan. Start with **Your details** and complete the interview. Use **Defined benefit and UK pensions** for those income sources and **Super & investments** for accumulation and account-based pension balances.
 
-## iPad
+No account, paid subscription or GitHub login is needed to use or install the app. Offline operation and layout still need verification on actual iPad and iPhone hardware; desktop browser testing is not a substitute.
 
-Open the HTTPS address in Safari, choose Share → Add to Home Screen → Open as Web App. Load once online, close and reopen to ensure the service worker controls the app, then test offline. Use that installed copy consistently. Data does not synchronise between devices. Download a JSON backup to Files before uninstalling, clearing browser data, changing devices or updating.
+## Keep a backup
 
-## Privacy
+Answers are saved automatically on the current device. **They do not synchronise between devices or browser copies.** Do not assume that Safari and the installed app share a plan: check the saved answers in the copy you intend to use.
 
-There are no AI calls, remote fonts, analytics, financial connectors or data-upload endpoints. The app only loads its own static files. Entered answers remain in origin-scoped local storage; calculations use a local module Web Worker. The public hosting provider can see ordinary requests for application files, but financial answers are not encoded in those requests. Exports contain personal answers and should be kept private.
+Tap **Backup** and save the downloaded JSON file in **Files**. Make a backup before clearing browser data, removing the app, changing devices or updating. Backup files and CSV exports contain the entered information; keep them private.
 
-## Calculations and limitations
-
-Rules reviewed 6 October 2026. Government rates have effective dates; future benefits/thresholds use an explicit indexation assumption. Investment return and volatility presets are editable modelling judgements inspired by CSC/PSSap categories, not product forecasts.
-
-This is a planning engine, **not a verified tax calculator or eligibility determination**. Its prominent in-app Help explains all approximations. In particular:
-
-- Birthdays and event timing are monthly. An initial partial financial year needs a prior-income estimate.
-- Medicare low-income thresholds are editable planning approximations. SAPTO spouse transfers, Medicare levy surcharge, Division 296, unusual pre-60 withdrawals, SMSF-specific tax and non-resident Australian taxation are not automatic; verified annual adjustments are needed.
-- Foreign pension classification and applicable fund earnings must be externally verified. Unresolved UK lump-sum tax uses a labelled 30% reserve. Withholding refunds/credits require explicit entries.
-- The estate calculator is simplified and does not determine trusts, gifts, allowance tapering, reliefs or inherited-pension beneficiary income tax.
-- Contributions require verified eligibility/caps. Individual transfer balance cap and bring-forward rules are not inferred.
-- Care costs require actual estimates; residential aged-care means-tested fees are not automatically determined.
-- Survivor asset transfers simplify tax, estate delays and pension transfer-balance consequences.
-- Cash-only settlement charts are conservative and approximate; the full model includes investment/super funding and more tax detail.
-- No Rent Assistance, Work Bonus, legacy/grandfathered benefits, overseas portability or illness-separated rates.
-- Normal innovations plus optional crash shocks cannot describe all real-world tail risks. Success rates are conditional simulation outputs, not guarantees.
-
-## Checks
-
-`npm run check` checks JavaScript syntax. `npm test` runs consequential calculation tests for enacted tax rates, Age Pension means tests, covariance, cash-flow conservation, distribution double counting, pension minimum withdrawals, scheduled allocations, settlement timing, inheritance exclusion, essential spending shortfalls, loan payoff, backup schema and reproducibility.
-
-Version 1.1 adds input warnings and blocking validation, corrects pension minimums and tax shortfalls, handles non-homeowner status without a pending purchase, and reports unsupported essential spending explicitly. See the automated tests for covered cases. A DOM-stub check renders all interview sections, repeaters, navigation and help topics without a runtime exception. The deployed app and strategy comparisons have been checked in a desktop browser. Actual iPad layout, offline reopening and download/restore interaction testing remain pending.
+To import a backup, go to **Your details → Restore backup**, select the JSON file and confirm replacement of that device's plan. **Recover previous plan** can recover the locally held recovery copy when one exists; it does not replace an external backup.
 
 ## Updates
 
-Change the service-worker cache version when application files change. The worker deliberately does not force a new version onto open clients; users should back up, close all app windows and reopen. Schema changes require an explicit migration rather than silently discarding stored plans.
+Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.3**. Updates preserve existing schema-1 answers.
+
+## Calculations, warnings and limitations
+
+The app models monthly cash flows and displays annual summaries in current-year purchasing power by default. Future-dollar displays are approximate. Investment return and volatility presets are editable assumptions, not forecasts. Simulation success rates depend on the entered facts, sample size and model; they are not guarantees.
+
+Warnings flag choices such as inflation at or below 1%, zero investment fluctuations, optimistic returns, short horizons, inheritance dependence and duplicated costs. Invalid or contradictory dates, allocations and budgets block calculation. **Passing these checks does not establish that the information is correct or the results are reliable.** Read **Help** before interpreting results.
+
+Rules were reviewed on 6 October 2026 and may change. Important limitations include:
+
+- Tax, Age Pension and eligibility calculations are simplified. The app is not a verified tax calculator or eligibility determination.
+- Pension tax components, survivor terms, foreign-pension classification, applicable fund earnings, withholding and contribution eligibility/caps require independent verification. Unresolved UK lump-sum tax uses a labelled provisional 30% reserve.
+- Medicare low-income thresholds are planning approximations. Division 296, Medicare levy surcharge, SAPTO spouse transfers, unusual pre-60 withdrawals, SMSF-specific tax and non-resident Australian taxation are not automatic.
+- Events and birthdays have monthly resolution; initial partial financial years need income already received since 1 July. Same-month receipt and settlement ordering can hide a funding gap.
+- Estate and survivor calculations simplify legal, tax, timing and transfer-balance consequences. Aged-care means-tested fees are not automatically determined.
+- The separate settlement view is a conservative cash-only approximation. No Rent Assistance, Work Bonus, grandfathered benefits, overseas portability or illness-separated rates are included.
+- Normal market innovations and optional crashes cannot capture every tail risk, policy change or prolonged market regime. Inheritances are uncertain scenario assumptions and excluded by default.
+
+## If a calculation stops or the browser reloads
+
+Standard comparisons stop after 50 seconds of computation; advanced annual reassessment stops after 30 seconds. A separate browser watchdog terminates a stalled worker. No incomplete comparison is presented as a completed result. The limits protect against runaway calculations but cannot prevent every device or browser crash.
+
+If a calculation cannot finish, keep a backup, set **Your details → Assumptions → Simulation paths** to **100**, and use the three standard strategies. Fewer paths mean greater sampling uncertainty. Annual reassessment runs many nested simulations and may not finish on a slower device. **Cancel calculation** stops a running calculation. Leaving the page stops its worker.
+
+If the page reloads unexpectedly, reopen the same copy and check that the saved answers are present. Close other heavy browser tabs and try again after updating online. For a bug report, provide the app version, device model, iOS/iPadOS version, the action that triggered it and any displayed error. Do not publish a personal backup or financial figures in a public issue.
+
+## Privacy
+
+There are no AI calls, remote fonts, analytics, financial connectors or data-upload endpoints. Answers remain in device-local storage; calculations run in a local Web Worker. The host can see ordinary requests for the app's static files, but entered financial answers are not included in those requests. Device/browser storage can nevertheless be cleared or become unavailable, so keep backups.
+
+## For contributors
+
+Source repository: https://github.com/BarbaraRobson/retirement-horizons
+
+There are no package dependencies. With Node 22 or later, run `npm run check` for syntax and `npm test` for calculation and UI regressions. The GitHub Actions publishing workflow tests and deploys public application files to the active page above. Do not commit personal financial files or backup exports. Bump the app and service-worker versions together when public files change; schema changes need an explicit migration.
+
+Automated checks cover specific known cases, not every possible financial circumstance or browser behaviour. Mobile hardware testing remains necessary.
 
 ## Authoring record
 
 Date: 2026-10-06. Model: GPT-6. Prompt: Build a generic Australian/UK retirement PWA, covering the agreed interview, uncertainty, fixed/phased/guardrail spending comparisons, advanced reassessment, current/future dollars, editable assumptions and super allocation schedules, with local data, CSV, iPad design and GitHub Pages publishing.
 
-## Input safeguards (v1.1)
-
-Invalid or contradictory plans cannot calculate. Unusual assumptions stay editable with prominent warnings: inflation at or below 1%, zero investment volatility, high real returns, low correlations, exchange-rate direction, short horizons, unpaid debt interest, inheritance dependency and duplicated costs. Existing local answers and schema-1 backups are preserved. Close all app windows and reopen online to receive the update.
-
 Date: 2026-10-06. Model: GPT-6. Prompt: Audit and fix financial edge cases and flag reasonable input mistakes without overwriting user data.
+
+Date: 2026-10-07. Model: GPT-6. Prompt: Rewrite the README for independent iPad/iPhone installation with a prominent education and entertainment warning, possible errors and no personal financial advice; use the active address; rename the pensions section and investigate browser crashes.
