@@ -41,14 +41,17 @@ test('Worker failure, timeout, cancellation and page exit retain saved answers',
 // Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.
 
 test('Repeated pre-simulation navigation keeps controls mounted and releases old form subtrees',async()=>{
- const d=demo(),stored=new Map([['retirement-horizons-plan-v1',JSON.stringify(d)]]),handlers=new Map(),elements=new Map();let navigationWrites=0,removals=0,mainWrites=0,blurred=0;
+ const d=demo(),stored=new Map([['retirement-horizons-plan-v1',JSON.stringify(d)]]),handlers=new Map(),elements=new Map();let navigationWrites=0,removals=0,mainWrites=0,blurred=0;const pending=[];
  const controls=['interview','compare','settlement','scenarios','details','help'].map(page=>({dataset:{page},classList:{toggle(){}},setAttribute(){},removeAttribute(){}}));
- const element=id=>{if(!elements.has(id)){let html='';elements.set(id,{get innerHTML(){return html;},set innerHTML(v){html=v;if(id==='#navigation')navigationWrites++;if(id==='#main')mainWrites++;},textContent:'',style:{},contains:n=>Boolean(n?.inMain),querySelectorAll:()=>[{remove(){removals++;}},{remove(){removals++;}}],addEventListener:(kind,fn)=>handlers.set(id+':'+kind,fn)});}return elements.get(id);};
+ const element=id=>{if(!elements.has(id)){let html='';elements.set(id,{get innerHTML(){return html;},set innerHTML(v){html=v;if(id==='#navigation')navigationWrites++;if(id==='#main')mainWrites++;},textContent:'',style:{},contains:n=>Boolean(n?.inMain),querySelectorAll:s=>s==='[data-bind]'?pending:[{remove(){removals++;}},{remove(){removals++;}}],addEventListener:(kind,fn)=>handlers.set(id+':'+kind,fn)});}return elements.get(id);};
  globalThis.document={querySelector:element,querySelectorAll:s=>s==='#navigation [data-page]'?controls:[],activeElement:null};globalThis.localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)};globalThis.window={addEventListener(){},scrollTo(){}};
  const oldWorker=globalThis.Worker;globalThis.Worker=class{constructor(){throw Error('Navigation must not start a simulation');}};
  try{await import('../app.js?navigation-stress');const nav=page=>handlers.get('#navigation:click')({target:{closest:()=>({dataset:{page}})}});nav('interview');const before=mainWrites;nav('interview');assert.equal(mainWrites,before);
  const field={inMain:true,type:'number',tagName:'INPUT',dataset:{bind:'settings.inflation'},value:'3',min:'',max:'',blur(){blurred++;document.activeElement=null;handlers.get('#main:change')({target:this});}};document.activeElement=field;nav('help');assert.equal(blurred,1);assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).settings.inflation,3);
+ pending.push({type:'text',tagName:'INPUT',dataset:{bind:'people.0.label'},value:'Fictional pending edit'});nav('interview');assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).people[0].label,'Fictional pending edit');pending.length=0;
  for(let i=0;i<180;i++)nav(controls[i%controls.length].dataset.page);assert.equal(navigationWrites,1);assert(removals>180);assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).people[0].dob,d.people[0].dob);
  }finally{globalThis.Worker=oldWorker;}
 });
 // Date: 2026-10-07. Model: GPT-6. Prompt: Stress repeated tab changes before any simulation, retaining navigation nodes and entered answers while releasing old form subtrees.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Verify a tab switch saves visible edits even without a native change event.

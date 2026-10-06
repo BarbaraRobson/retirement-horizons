@@ -1,4 +1,4 @@
-export const VERSION='1.1.4';
+export const VERSION='1.1.5';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,
@@ -65,3 +65,5 @@ export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[
 // Date: 2026-10-07. Model: GPT-6. Prompt: Rewrite the README for iPad/iPhone users with a prominent education and entertainment disclaimer and live address; rename Pensions to Defined benefit and UK pensions; investigate and reduce browser crashes.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Increase the default stochastic run count from 400 to 1500, including existing plans on the former default, with consistent bounds and runtime safeguards.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Release navigation hardening and delayed-input commit fixes without discarding saved plans.
