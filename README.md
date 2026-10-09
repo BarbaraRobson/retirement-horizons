@@ -30,7 +30,7 @@ To import a backup, go to **Your details → Restore backup**, select the JSON f
 
 ## Updates
 
-Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.6**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
+Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.8**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
 
 ## Calculations, warnings and limitations
 
@@ -54,7 +54,7 @@ Other rules were reviewed on 6 October 2026 and may change. Important limitation
 
 ## If a calculation stops or the browser reloads
 
-The default sample is 1,500 stochastic paths for each standard strategy. Plans still using the former 400-path default are upgraded once; other saved sample counts are kept. Larger samples can take several minutes on a mobile device. Standard comparisons stop after three minutes of computation; advanced annual reassessment stops after 30 seconds. A separate browser watchdog terminates a stalled worker. No incomplete comparison is presented as a completed result. The limits protect against runaway calculations but cannot prevent every device or browser crash.
+The default sample is 1,000 stochastic paths for each standard strategy. Former default sample counts of 400 or 1500 change to 1000 once; other saved counts are kept. The former 150% guardrails ceiling changes once to 200%; other values are kept. Larger samples can take several minutes on a mobile device. Standard comparisons stop after three minutes of computation; advanced annual reassessment stops after 30 seconds. A separate browser watchdog terminates a stalled worker. No incomplete comparison is presented as a completed result. The limits protect against runaway calculations but cannot prevent every device or browser crash.
 
 If a calculation cannot finish, keep a backup, set **Your details → Assumptions → Simulation paths** to **100**, and use the three standard strategies. Fewer paths mean greater sampling uncertainty. Annual reassessment runs many nested simulations and may not finish on a slower device. **Cancel calculation** stops a running calculation. Leaving the page stops its worker.
 
@@ -89,3 +89,19 @@ Date: 2026-10-07. Model: GPT-6. Prompt: Document navigation hardening following 
 Date: 2026-10-07. Model: GPT-6. Prompt: Review PSS survivor percentage, age-55 access and partial-year income; clarify periods, add commencement dates and correct related pension assumptions.
 
 Date: 2026-10-07. Model: GPT-6. Prompt: Keep the published 67% survivor default and start projections on 1 January of the current year with complete calendar-year results.
+
+## Automatic super access dates
+
+Each account calculates an access date from its owner’s date of birth: age 60 by default, assuming retirement conditions will be met, or age 65 regardless of work. A confirmed date can override this for employment cessation after 60. Existing entered dates are preserved. Changing the owner or birth date updates automatic dates; manual dates remain unchanged. Pension phase begins at the calculated access date by default, unless kept in accumulation or given a manual commencement date. The model uses monthly resolution and does not implement transition-to-retirement restrictions or pre-60 early-release exceptions. See [ATO access rules](https://www.ato.gov.au/individuals-and-families/super-for-individuals-and-families/super/withdrawing-and-using-your-super/early-access-to-super/illegal-early-access-to-super).
+
+Date: 2026-10-07. Model: GPT-6. Prompt: Automatically calculate super access dates from partners’ birth dates, with retirement assumptions and preserved manual overrides.
+
+## Explanations and suggested entries
+
+Tap ⓘ beside an input for its explanation; Close or Escape dismisses it. Unconfirmed suggested values are shaded and include a Confirm value button. Replacement-home cash supplies opening cash only if blank or still an unconfirmed suggestion. It is not added a second time. Earliest settlement supplies expected/latest dates two/six months later when blank; these are illustrative scenarios, not a typical-delay forecast. Edit them from the contract and builder’s advice. Net house sale proceeds was record-only and is no longer shown. Older backup records are retained for compatibility.
+
+The guardrails headline is the median, across simulation paths, of each path’s median annual funded living spending over the whole projection. It includes survivor spending and shortfalls and differs from starting spending. The failure year is the earliest failure in the tested paths, not a predicted date: other paths can fail later or succeed. Estate-reserve failures occur at the horizon.
+
+Age 55 is the PSS retirement assumption, not a universal defined benefit access rule. Other schemes require their own confirmed commencement dates. Access/phase assumptions describe the model; actual conditions and pension elections must be checked with the fund.
+
+Date: 2026-10-09. Model: GPT-6. Prompt: Document explanatory pop-ups, provisional suggestions, 1000 runs, retirement/pension defaults, failure timing and lifetime guardrails spending.

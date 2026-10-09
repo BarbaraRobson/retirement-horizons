@@ -1,3 +1,4 @@
+import {accessMode,superAccessDate,pensionStartDate} from './super-access.js';
 import {PRESETS} from './rules.js';
 
 export function validDate(s){
@@ -56,7 +57,7 @@ export function inputErrors(d){
    for(const r of rows){need(Object.hasOwn(PRESETS,r.option)&&num(r.weight)&&r.weight>=0&&r.weight<=100&&num(r.real)&&r.real>=-20&&r.real<=30&&num(r.vol)&&r.vol>=0&&r.vol<=50,`${label}: check weights, returns and volatility in ${name}.`);}
   }
  }
- d.accounts.forEach(a=>{if(validDate(a.accessDate)&&Number.isInteger(a.owner)&&d.people[a.owner]&&validDate(d.people[a.owner].dob)&&ageAt(d.people[a.owner].dob,mo(a.accessDate))<60)need(false,`${a.label}: access before age 60 is unsupported; use a verified external calculation rather than an apparently accessible balance.`);need(['accumulation','pension','smsf','unknown'].includes(a.type),`${a.label}: select a supported account type.`);need(Number.isInteger(a.owner)&&a.owner>=0&&a.owner<2,`${a.label}: select a valid owner.`);for(const k of ['accessDate','pensionDate'])if(a[k])need(validDate(a[k]),`${a.label}: check ${k}.`);if(a.accessDate&&a.pensionDate)need(a.pensionDate>=a.accessDate,`${a.label}: pension commencement precedes its access date.`);});
+ d.accounts.forEach(a=>{const mode=accessMode(a),access=superAccessDate(a,d.people,d.start);need(['age65','retired60','manual','current'].includes(mode),`${a.label}: select a supported access assumption.`);if(mode==='manual')need(validDate(a.accessDate),`${a.label}: enter the confirmed access date.`);if(mode==='current')need(a.type==='pension',`${a.label}: already receiving a pension requires an account-based pension account.`);if(validDate(access)&&mode!=='current'&&Number.isInteger(a.owner)&&d.people[a.owner]&&validDate(d.people[a.owner].dob)&&ageAt(d.people[a.owner].dob,mo(access))<60)need(false,`${a.label}: access before age 60 is unsupported; use a verified external calculation rather than an apparently accessible balance.`);need(['accumulation','pension','smsf','unknown'].includes(a.type),`${a.label}: select a supported account type.`);need(Number.isInteger(a.owner)&&a.owner>=0&&a.owner<2,`${a.label}: select a valid owner.`);for(const k of ['accessDate','pensionDate'])if(a[k])need(validDate(a[k]),`${a.label}: check ${k}.`);const pension=pensionStartDate(a,d.people,d.start);if(access&&pension)need(pension>=access,`${a.label}: pension commencement precedes its access date.`);});
  for(const [i,c] of d.contributions.entries()){need(Number.isInteger(c.account)&&c.account>=0&&c.account<d.accounts.length,`Contribution ${i+1}: select an existing account.`);if(c.amount>0){need(validDate(c.date),`Contribution ${i+1}: enter a payment date.`);if(mo(c.date)!==null)need(mo(c.date)>=start,`Contribution ${i+1}: past contributions belong in opening balances.`);}}
  const phaseYears=new Set();for(const p of d.spending.phases){need(num(p.year)&&Number.isInteger(p.year), 'Spending phases require whole calendar years.');need(!phaseYears.has(p.year),`Two spending phases use ${p.year}; retain one per year.`);phaseYears.add(p.year);need(num(p.multiplier)&&p.multiplier<=200,'Spending phase percentage must be between 0 and 200%.');}
  for(const ev of d.spending.events){if(ev.amount>0){need(validDate(ev.date),`${ev.label}: enter a payment date.`);if(mo(ev.date)!==null&&ev.repeat===0)need(mo(ev.date)>=start,`${ev.label}: a past one-off payment will not be included; remove it or change its date.`);}need(Number.isInteger(ev.repeat)&&ev.repeat>=0,`${ev.label}: repeat interval must be a whole number of years.`);}
@@ -95,6 +96,8 @@ export function inputWarnings(d){
  if(s.paths<400)w.push('Fewer than 400 paths gives coarse tail probabilities. A displayed success percentage is a model sample, not a precise guarantee.');
  if(s.success>=98)w.push('The selected success target is close to the simulation tail. Rare-event estimates are sensitive to sample size and model assumptions.');
  if(start!==null&&start%12===0)w.push('Whole-year projection: opening balances must be at 1 January, with all income and events from that date. Updating the start does not reconstruct past balances. The final planning year extends through December.');
+ for(const path of Object.keys(d.suggestions||{}))w.push(`${path}: suggested value is unconfirmed; edit or confirm before relying on this plan.`);
+ if(d.housing.enabled&&d.housing.exemptionMonths>24&&!d.housing.extensionVerified)w.push('Home-sale exemption beyond 24 months is unconfirmed; the model limits it to 24 months.');
  const allocations=[['Outside investments',d.assets.outside,d.assets],...d.accounts.map(a=>[a.label,a.balance,a])];
  for(const [label,balance,a] of allocations){if(!(balance>0)&&!(a===d.assets&&d.assets.cash>d.spending.reserve))continue;
   for(const [name,rows] of [['current mix',a.mix],...a.changes.map(c=>['mix from '+c.year,c.mix])]){
@@ -109,7 +112,7 @@ export function inputWarnings(d){
  if(s.correlation<.25&&allocations.some(x=>x[1]>0&&x[2].mix.filter(r=>r.weight>0&&r.vol>0).length>1))w.push('Low correlation can materially reduce simulated portfolio risk. Check that the options really provide this degree of diversification.');
  d.people.forEach(p=>{
   if(p.db.gross>0&&p.db.kind!=='None'){
-   if(!p.db.start)w.push(`${p.label}: defined benefit pension is assumed already payable at the plan start. Enter a commencement date if it starts later.`);
+   if(!p.db.start)w.push(`${p.label}: defined benefit commencement uses the default access assumption (PSS at 55 if retired; other schemes already payable). Enter the actual commencement date if different.`);
    if(p.db.kind==='PSS'&&p.db.survivor!==67&&p.db.survivor!==85)w.push(`${p.label}: PSS survivor assumption is ${p.db.survivor}%. CSC lists 67% for spouse only, or 85% under the higher dependant option; verify your entitlement.`);
    if(p.db.kind==='PSS'&&validDate(p.dob)&&ageAt(p.dob,mo(p.db.start)??start)<55)w.push(`${p.label}: ordinary PSS retirement access generally starts at 55 subject to retirement conditions. Earlier or invalidity benefits require a verified estimate; disability tax offsets are not modelled.`);
    if(p.db.untaxed===100&&!p.db.verified)w.push(`${p.label}: the default 100% untaxed component may overstate tax. Enter the actual pension components from CSC payment advice.`);
@@ -150,3 +153,7 @@ export function inputWarnings(d){
 // Date: 2026-10-07. Model: GPT-6. Prompt: Review PSS survivor percentage, age-55 access and partial-year income; clarify periods, add commencement dates and correct related pension assumptions.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Keep the published 67% survivor default and start projections on 1 January of the current year with complete calendar-year results.
+
+// Date: 2026-10-07. Model: GPT-6. Prompt: Automatically calculate super access dates from partners’ birth dates, with retirement assumptions and preserved manual overrides.
+
+// Date: 2026-10-09. Model: GPT-6. Prompt: Add explanatory pop-ups, provisional cash/date suggestions, 1000 paths, automatic retirement/pension defaults, failure timing and a lifetime guardrails median with a 200% cap.

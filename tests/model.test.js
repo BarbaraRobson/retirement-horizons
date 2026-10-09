@@ -60,7 +60,7 @@ test('Time budgets reject standard and advanced work without returning partial r
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify compact aggregation keeps simulation results unchanged and calculation budgets stop work without presenting partial results.
 
 test('Standard comparisons actually use all 1500 requested stochastic paths',()=>{
- const d=base();d.settings.paths=1500;d.spending.desired=10000;assert.equal(inputErrors(d).length,0);const result=compare(d);assert(result.results.every(r=>r.count===1500));assert.equal(defaults().settings.paths,1500);d.settings.paths=1501;assert(inputErrors(d).some(e=>e.includes('paths')));
+ const d=base();d.settings.paths=1500;d.spending.desired=10000;assert.equal(inputErrors(d).length,0);const result=compare(d);assert(result.results.every(r=>r.count===1500));assert.equal(defaults().settings.paths,1000);d.settings.paths=1501;assert(inputErrors(d).some(e=>e.includes('paths')));
 });
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify the requested 1500-path stochastic sample is used without the former 1000-path clamp.
 
@@ -96,3 +96,28 @@ test('Both deaths during a year still produce a complete final calendar-year row
  const d=calendarPlan(base());const year=Number(d.start.slice(0,4));d.people.forEach(p=>{p.dob=`${year-60}-07-01`;p.endAge=62;p.deathAge=60;});const r=simulate(d,'fixed',12000,zero(d),{detail:true});assert(r.rows.every(y=>y.months===12));assert.equal(r.rows[0].spending,6000);
 });
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify current-year January commencement, full-year PSS totals and complete final calendar-year rows.
+
+test('Super access dates follow birth date, owner and selected retirement assumption',async()=>{
+ const {birthday,superAccessDate}=await import('../super-access.js');const people=[{dob:'1970-07-20'},{dob:'1973-11-16'}];const a={owner:0,type:'accumulation',accessDate:''};assert.equal(superAccessDate(a,people,'2026-01-01'),'2030-07-20');a.accessMode='retired60';assert.equal(superAccessDate(a,people,'2026-01-01'),'2030-07-20');a.owner=1;assert.equal(superAccessDate(a,people,'2026-01-01'),'2033-11-16');people[1].dob='1974-04-03';assert.equal(superAccessDate(a,people,'2026-01-01'),'2034-04-03');assert.equal(birthday('1960-02-29',65),'2025-02-28');assert.equal(birthday('1960-02-30',65),'');assert.equal(birthday('',60),'');
+});
+test('Automatic access governs actual withdrawals and pension commencement validation',()=>{
+ const d=base();d.assets.cash=0;d.accounts=[{label:'Super',owner:0,type:'accumulation',balance:100000,accessMode:'age65',accessDate:'',pensionDate:'',fee:0,mix:d.assets.mix,changes:[],manualWithdrawal:0}];assert.equal(simulate(d,'fixed',12000,zero(d)).success,false);d.accounts[0].accessMode='retired60';assert.equal(simulate(d,'fixed',12000,zero(d)).success,true);d.accounts[0].accessMode='age65';d.accounts[0].pensionDate='2027-01-01';assert(inputErrors(d).some(x=>x.includes('pension commencement precedes')));
+});
+test('Legacy manual dates remain overrides and missing manual dates are blocked',async()=>{
+ const {accessMode,superAccessDate}=await import('../super-access.js');const d=base();const a={label:'Super',owner:0,type:'accumulation',balance:100000,accessDate:'2028-01-01',pensionDate:'',fee:0,mix:d.assets.mix,changes:[],manualWithdrawal:0};assert.equal(accessMode(a),'manual');assert.equal(superAccessDate(a,d.people,d.start),'2028-01-01');d.people[0].dob='1967-05-01';assert.equal(superAccessDate(a,d.people,d.start),'2028-01-01');a.accessMode='manual';a.accessDate='';d.accounts=[a];assert(inputErrors(d).some(x=>x.includes('enter the confirmed access date')));
+});
+// Date: 2026-10-07. Model: GPT-6. Prompt: Verify automatic super dates, owner/DOB updates, leap birthdays, withdrawal eligibility, manual overrides and pension-phase validation.
+
+test('Suggested settlement dates and cash never overwrite confirmed values',async()=>{
+ const {applySuggestions,acceptSuggestion,addMonths}=await import('../planning-inputs.js');const d=base();d.housing.earliest='2027-01-31';applySuggestions(d,'housing.earliest');assert.equal(d.housing.expected,'2027-03-31');assert.equal(d.housing.latest,'2027-07-31');assert.equal(addMonths('2028-12-31',2),'2029-02-28');assert.equal(addMonths('2026-02-30',2),'');acceptSuggestion(d,'housing.expected');d.housing.earliest='2027-02-01';applySuggestions(d,'housing.earliest');assert.equal(d.housing.expected,'2027-03-31');assert.equal(d.housing.latest,'2027-08-01');d.assets.cash=null;d.housing.reserved=400000;applySuggestions(d,'housing.reserved');assert.equal(d.assets.cash,400000);acceptSuggestion(d,'assets.cash');d.housing.reserved=450000;applySuggestions(d,'housing.reserved');assert.equal(d.assets.cash,400000);d.assets.cash=0;applySuggestions(d,'housing.reserved');assert.equal(d.assets.cash,0);
+});
+test('Automatic pension phase follows access and accumulation opt-out suppresses minima',async()=>{
+ const {pensionStartDate,dbStartDate}=await import('../super-access.js');const d=base();const a={label:'Super',owner:0,type:'accumulation',balance:100000,accessMode:'retired60',pensionAuto:true,keepAccumulation:false,accessDate:'',pensionDate:'',fee:0,mix:d.assets.mix,changes:[],manualWithdrawal:0};d.accounts=[a];assert.equal(pensionStartDate(a,d.people,d.start),'2026-07-01');const r=simulate(d,'fixed',0,zero(d),{detail:true});assert(r.rows[0].withdrawals>0);a.keepAccumulation=true;assert.equal(pensionStartDate(a,d.people,d.start),'');assert.equal(simulate(d,'fixed',0,zero(d),{detail:true}).rows[0].withdrawals,0);a.keepAccumulation=false;a.pensionDate='2027-01-01';assert.equal(pensionStartDate(a,d.people,d.start),'2027-01-01');assert.equal(dbStartDate(d.people[0],d.start),'2021-07-01');
+});
+test('Failure diagnostics distinguish payment shortfall from final estate reserve',()=>{
+ const d=base();d.assets.cash=0;d.spending.essential=12000;const a=simulate(d,'fixed',12000,zero(d),{detail:true});assert.equal(a.firstFailureYear,2026);assert.match(a.firstFailureReason,/cannot be funded/);d.assets.cash=100000;d.spending.essential=0;d.spending.estate=200000;const b=simulate(d,'fixed',0,zero(d));assert.equal(b.firstFailureYear,2027);assert.match(b.firstFailureReason,/estate reserve/);
+});
+test('Guardrails lifetime median is derived from each path, with 1000-run and 200% defaults',()=>{
+ const d=base();d.settings.paths=100;d.spending.desired=20000;d.people.forEach(p=>p.endAge=63);d.spending.essential=5000;const result=compare(d),r=result.results.find(r=>r.strategy==='guardrails'),zs=paths(d,100);const median=a=>{a.sort((x,y)=>x-y);return (a[49]+a[50])/2;};const per=zs.map(z=>{const ys=simulate(d,'guardrails',r.start,z,{detail:true}).rows.map(y=>y.spending/y.infl*12/y.months).sort((a,b)=>a-b);const i=(ys.length-1)/2;return (ys[Math.floor(i)]+ys[Math.ceil(i)])/2;});assert.equal(r.lifetimeMedian,median(per));assert.equal(defaults().settings.paths,1000);assert.equal(defaults().settings.guardMax,200);
+});
+// Date: 2026-10-09. Model: GPT-6. Prompt: Verify provisional suggestions preserve manual entries, automatic pension minima/opt-out, failure reasons and independently calculated guardrails lifetime medians.

@@ -17,7 +17,7 @@ test('Navigation, assumption warnings and blocked calculations work with saved a
  action('step',{step:'6'});assert(element('#main').innerHTML.includes('low long-term assumption'));assert(element('#main').innerHTML.includes('zero market fluctuations'));
  nav('help');assert(element('#main').innerHTML.includes('Understand your plan'));
  nav('interview');action('finish');assert(element('#main').innerHTML.includes('Calculation blocked'));assert(element('#main').innerHTML.includes('Desired spending must be at least essential spending'));
- assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).people[0].dob,d.people[0].dob);assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).settings.paths,1500);assert(stored.has('retirement-horizons-1500-runs-v1'));
+ assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).people[0].dob,d.people[0].dob);assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).settings.paths,1000);assert(stored.has('retirement-horizons-defaults-v118'));
 });
 // Date: 2026-10-06. Model: GPT-6. Prompt: Regression-test navigation, visible assumption warnings, blocked invalid calculations and preservation of saved questionnaire answers.
 
@@ -32,7 +32,7 @@ test('Worker failure, timeout, cancellation and page exit retain saved answers',
  action('calculate');const first=workers.at(-1);assert.equal(timers.size,1);first.onmessage({data:{error:'Device time limit reached'}});assert(first.terminated);assert.equal(timers.size,0);assert(element('#main').innerHTML.includes('Device time limit reached'));
  action('calculate');const second=workers.at(-1);const timer=[...timers.values()].find(t=>t.ms===200000);timer.fn();assert(second.terminated);assert(element('#main').innerHTML.includes('No partial result is shown'));
  action('calculate');action('cancel');assert(workers.at(-1).terminated);assert.equal(timers.size,0);
- action('calculate');handlers.get('window:pagehide')();assert(workers.at(-1).terminated);assert.equal(timers.size,0);assert.equal(stored.get('retirement-horizons-plan-v1'),JSON.stringify({...d,start:`${new Date().getFullYear()}-01-01`}));
+ action('calculate');handlers.get('window:pagehide')();assert(workers.at(-1).terminated);assert.equal(timers.size,0);assert.deepEqual(JSON.parse(stored.get('retirement-horizons-plan-v1')).people,d.people);assert.equal(JSON.parse(stored.get('retirement-horizons-plan-v1')).start,`${new Date().getFullYear()}-01-01`);
  globalThis.Worker=class{constructor(){throw Error('Worker unavailable');}};action('calculate');assert(element('#main').innerHTML.includes('could not start the calculation worker'));
  }finally{globalThis.setTimeout=oldSet;globalThis.clearTimeout=oldClear;globalThis.Worker=oldWorker;}
 });
@@ -57,3 +57,11 @@ test('Repeated pre-simulation navigation keeps controls mounted and releases old
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify a tab switch saves visible edits even without a native change event.
 
 // Date: 2026-10-07. Model: GPT-6. Prompt: Verify calendar-start migration and visible DB commencement and published survivor-rate guidance.
+
+test('Explanatory dialogs and provisional suggestions remain usable across navigation',async()=>{
+ const d=demo();d.assets.cash=null;d.housing.expected='';d.housing.latest='';d.housing.earliest='';const handlers=new Map(),elements=new Map(),stored=new Map([['retirement-horizons-plan-v1',JSON.stringify(d)]]);let opened=0,closed=0;
+ const element=id=>{if(!elements.has(id))elements.set(id,{innerHTML:'',textContent:'',style:{},showModal(){opened++;},close(){closed++;},addEventListener:(k,fn)=>handlers.set(id+':'+k,fn)});return elements.get(id);};globalThis.document={querySelector:element,querySelectorAll:()=>[]};globalThis.localStorage={getItem:k=>stored.get(k)||null,setItem:(k,v)=>stored.set(k,v)};globalThis.window={addEventListener(){},scrollTo(){}};
+ await import('../app.js?suggestions-help');const action=(action,extra={})=>handlers.get('#main:click')({target:{closest:()=>({dataset:{action,...extra}})}});action('nav',{page:'interview'});action('step',{step:'1'});assert(!element('#main').innerHTML.includes('Net house sale proceeds'));assert(element('#main').innerHTML.includes('Information about House sale settlement date'));action('info',{label:'House sale settlement date',info:'Exemption starts at settlement'});assert.equal(opened,1);assert.equal(element('#field-info-text').textContent,'Exemption starts at settlement');action('closeinfo');assert.equal(closed,1);
+ const change=(bind,value,type='date')=>handlers.get('#main:change')({target:{type,tagName:'INPUT',dataset:{bind},value,min:'',max:''}});change('housing.earliest','2027-02-01');assert(element('#main').innerHTML.includes('Suggested'));action('confirmsuggestion',{path:'housing.expected'});change('housing.earliest','2027-03-01');let p=JSON.parse(stored.get('retirement-horizons-plan-v1'));assert.equal(p.housing.expected,'2027-04-01');assert.equal(p.housing.latest,'2027-09-01');change('housing.reserved','420000','number');action('step',{step:'3'});assert(element('#main').innerHTML.includes('Replacement-home cash only'));change('assets.cash','430000','number');action('step',{step:'1'});change('housing.reserved','450000','number');p=JSON.parse(stored.get('retirement-horizons-plan-v1'));assert.equal(p.assets.cash,430000);
+});
+// Date: 2026-10-09. Model: GPT-6. Prompt: Verify popup open/close, suggestion shading/confirmation and preservation of manual cash/date edits through navigation.
