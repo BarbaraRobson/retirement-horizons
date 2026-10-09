@@ -30,7 +30,7 @@ To import a backup, go to **Your details → Restore backup**, select the JSON f
 
 ## Updates
 
-Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.9**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
+Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.10**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
 
 ## Calculations, warnings and limitations
 

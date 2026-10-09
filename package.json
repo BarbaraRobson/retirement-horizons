@@ -1,1 +1,1 @@
-{"name":"retirement-horizons","version":"1.1.9","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.js","check":"node --check app.js && node --check model.js && node --check worker.js && node --check sw.js"}}
+{"name":"retirement-horizons","version":"1.1.10","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.js","check":"node --check app.js && node --check model.js && node --check worker.js && node --check sw.js"}}
