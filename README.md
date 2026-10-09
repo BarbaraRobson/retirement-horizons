@@ -30,7 +30,7 @@ To import a backup, go to **Your details → Restore backup**, select the JSON f
 
 ## Updates
 
-Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.8**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
+Back up first. Connect to the internet and open the app to let it download an update. If an update-ready message appears, close **all** Retirement Horizons browser and installed-app windows, then reopen. An open copy deliberately keeps its current code until closed. The footer shows the installed version; this release is **v1.1.9**. Updates preserve existing schema-1 answers, except the projection start is aligned to 1 January of the current year as described below.
 
 ## Calculations, warnings and limitations
 
@@ -105,3 +105,5 @@ The guardrails headline is the median, across simulation paths, of each path’s
 Age 55 is the PSS retirement assumption, not a universal defined benefit access rule. Other schemes require their own confirmed commencement dates. Access/phase assumptions describe the model; actual conditions and pension elections must be checked with the fund.
 
 Date: 2026-10-09. Model: GPT-6. Prompt: Document explanatory pop-ups, provisional suggestions, 1000 runs, retirement/pension defaults, failure timing and lifetime guardrails spending.
+
+The comparison includes a Wealth through retirement chart below spending. It shows year-end cash, investments, super, investment property and other entered assets less outstanding debts, including super that may not yet be accessible, and excludes the principal home (PPOR). Lines are medians and bands are central 80% ranges. The guardrails band is darker for readability.

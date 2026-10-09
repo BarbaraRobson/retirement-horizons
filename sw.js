@@ -1,4 +1,4 @@
-const CACHE='retirement-horizons-v1.1.8';
+const CACHE='retirement-horizons-v1.1.9';
 const ASSETS=['./','./index.html','./styles.css','./app.js','./model.js','./input-checks.js','./super-access.js','./planning-inputs.js','./field-info.js','./rules.js','./help.js','./worker.js','./manifest.webmanifest','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(new URL(path,self.location.href),{cache:'reload'}))))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('retirement-horizons-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
@@ -20,3 +20,5 @@ self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request
 // Date: 2026-10-07. Model: GPT-6. Prompt: Automatically calculate super access dates from partners’ birth dates, with retirement assumptions and preserved manual overrides.
 
 // Date: 2026-10-09. Model: GPT-6. Prompt: Add explanatory pop-ups, provisional cash/date suggestions, 1000 paths, automatic retirement/pension defaults, failure timing and a lifetime guardrails median with a 200% cap.
+
+// Date: 2026-10-09. Model: GPT-6. Prompt: Darken the guardrails outcome band and add comparison wealth through retirement, excluding PPOR and subtracting outstanding debts before calculating percentiles.

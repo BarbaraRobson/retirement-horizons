@@ -1,4 +1,4 @@
-export const VERSION='1.1.8';
+export const VERSION='1.1.9';
 export const CHECKED='2026-10-06';
 export const RULES={
  pensionAge:67, coupleMax:933*26,singleMax:1237.7*26,coupleBasic:855.9*26,singleBasic:1135.4*26,
@@ -78,3 +78,5 @@ export function demo(){const d=defaults();d.people[0].dob='1967-03-15';d.people[
 // Date: 2026-10-07. Model: GPT-6. Prompt: Automatically calculate super access dates from partners’ birth dates, with retirement assumptions and preserved manual overrides.
 
 // Date: 2026-10-09. Model: GPT-6. Prompt: Add explanatory pop-ups, provisional cash/date suggestions, 1000 paths, automatic retirement/pension defaults, failure timing and a lifetime guardrails median with a 200% cap.
+
+// Date: 2026-10-09. Model: GPT-6. Prompt: Darken the guardrails outcome band and add comparison wealth through retirement, excluding PPOR and subtracting outstanding debts before calculating percentiles.
